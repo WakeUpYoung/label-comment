@@ -3,7 +3,8 @@ package cn.wakeupeidolon.label.comment.domain.enums;
 public enum ErrorCode {
     
     SUCCESS(0, "success"),
-    ITEM_REPEAT(-501, "数据库中已有该商品"),
+    USER_REPEAT(-501, "该用户已注册"),
+    INVALID_CODE(-502, "输入的验证信息不正确"),
     UNKNOWN_ERROR(-1, "未知错误")
     ;
     

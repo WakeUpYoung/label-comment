@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "config.async.executor.core-pool-size",
+      "type": "java.lang.Integer",
+      "description": "Description for config.async.executor.core-pool-size."
+  }
+] }

@@ -1,6 +1,8 @@
-package cn.wakeupeidolon.label.comment.utils;
+package cn.wakeupeidolon.label.comment.service.async;
 
 import com.sun.mail.util.MailSSLSocketFactory;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -12,11 +14,17 @@ import java.util.Properties;
  * @author Wang Yu
  * 发送邮件
  */
-public class MailUtils {
+@Component
+public class EmailAsync {
     
-    private MailUtils(){}
-    
-    public static boolean sendEmail(String to){
+    /**
+     * 发送邮件
+     * @param to 收件人
+     * @param title 标题
+     * @param content 内容
+     */
+    @Async("asyncExecutor")
+    public void sendEmail(String to, String title, String content){
     
         // 发件人电子邮箱
         String from = "wangyu_onepach@qq.com";
@@ -37,7 +45,6 @@ public class MailUtils {
             properties.put("mail.smtp.ssl.socketFactory", sf);
         } catch (GeneralSecurityException e) {
             e.printStackTrace();
-            return false;
         }
     
         // 获取默认的 Session 对象。
@@ -58,21 +65,17 @@ public class MailUtils {
             // Set To: 头部头字段
             message.addRecipient(Message.RecipientType.TO,
                     new InternetAddress(to));
-        
+    
             // Set Subject: 标题
-            message.setSubject("This is the Subject Line!");
+            message.setSubject(title, "UTF-8");
         
             // 发送 HTML 消息, 可以插入html标签
-            message.setContent("<h1>This is actual message</h1>",
-                    "text/html" );
+            message.setContent(content, "text/html;charset=UTF-8");
         
             // 发送消息
             Transport.send(message);
-            System.out.println("Sent message successfully!");
         }catch (MessagingException mex) {
             mex.printStackTrace();
-            return false;
         }
-        return true;
     }
 }

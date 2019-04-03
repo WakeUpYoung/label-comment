@@ -24,6 +24,10 @@ public class RegisterVO implements Serializable {
     private String email;
     private String realName;
     private Integer gender;
+    @NotBlank
+    @NotNull
+    @ApiModelProperty("邮箱验证码")
+    private String validCode;
     
     public String getUsername() {
         return username;
@@ -63,5 +67,13 @@ public class RegisterVO implements Serializable {
     
     public void setGender(Integer gender) {
         this.gender = gender;
+    }
+    
+    public String getValidCode() {
+        return validCode;
+    }
+    
+    public void setValidCode(String validCode) {
+        this.validCode = validCode;
     }
 }

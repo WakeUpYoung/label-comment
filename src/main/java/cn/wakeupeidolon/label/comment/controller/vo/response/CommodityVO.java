@@ -3,7 +3,7 @@ package cn.wakeupeidolon.label.comment.controller.vo.response;
 import io.swagger.annotations.ApiModel;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * @author Wang Yu
@@ -18,8 +18,8 @@ public class CommodityVO implements Serializable {
     private Integer totalComment;
     private String itemId;
     private Integer type;
-    private Timestamp createDate;
-    private Timestamp updateDate;
+    private Date createDate;
+    private Date updateDate;
     
     public Long getId() {
         return id;
@@ -77,19 +77,19 @@ public class CommodityVO implements Serializable {
         this.type = type;
     }
     
-    public Timestamp getCreateDate() {
+    public Date getCreateDate() {
         return createDate;
     }
     
-    public void setCreateDate(Timestamp createDate) {
+    public void setCreateDate(Date createDate) {
         this.createDate = createDate;
     }
     
-    public Timestamp getUpdateDate() {
+    public Date getUpdateDate() {
         return updateDate;
     }
     
-    public void setUpdateDate(Timestamp updateDate) {
+    public void setUpdateDate(Date updateDate) {
         this.updateDate = updateDate;
     }
 }

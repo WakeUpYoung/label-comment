@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/commodity")
-@Api(tags = {"商品Controller"})
+@Api(tags = {"商品"})
 public class CommodityController {
     
     private final CommodityService commodityService;

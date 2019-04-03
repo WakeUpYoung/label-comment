@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -21,17 +22,12 @@ public class UserServiceImpl implements UserService {
         this.dao = dao;
     }
     
-    /**
-     * 注册
-     */
-    @Override
-    public User register(User user) {
-        
-        return null;
-    }
-    
     @Override
     public User save(User bean) {
+        bean.setIsAdmin((byte)0);
+        bean.setCreateDate(new Date());
+        bean.setUpdateDate(new Date());
+        bean.setId(null);
         return dao.save(bean);
     }
     
@@ -65,5 +61,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> findAll() {
         return dao.findAll();
+    }
+    
+    @Override
+    public boolean checkEmail(String email) {
+        return dao.countByEmail(email) == 0;
     }
 }
