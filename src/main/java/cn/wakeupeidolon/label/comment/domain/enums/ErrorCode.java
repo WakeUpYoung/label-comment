@@ -4,7 +4,9 @@ public enum ErrorCode {
     
     SUCCESS(0, "success"),
     USER_REPEAT(-501, "该用户已注册"),
-    INVALID_CODE(-502, "输入的验证信息不正确"),
+    NOT_REGISTER(-502, "该邮箱尚未注册"),
+    INVALID_CODE(-503, "输入的验证信息不正确"),
+    CANNOT_ACCESS(-401, "禁止访问"),
     UNKNOWN_ERROR(-1, "未知错误")
     ;
     

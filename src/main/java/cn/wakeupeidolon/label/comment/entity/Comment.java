@@ -9,7 +9,7 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "tb_comment")
-public class Comment implements BaseBean{
+public class Comment implements BaseBean<Long>{
     private Long id;
     private Long commodityId;
     private String premiereComment;
@@ -21,6 +21,7 @@ public class Comment implements BaseBean{
     
     @Id
     @Column(name = "id")
+    @GeneratedValue(strategy  = GenerationType.IDENTITY)
     public Long getId() {
         return id;
     }

@@ -6,6 +6,7 @@ import cn.wakeupeidolon.label.comment.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -27,7 +28,6 @@ public class UserServiceImpl implements UserService {
         bean.setIsAdmin((byte)0);
         bean.setCreateDate(new Date());
         bean.setUpdateDate(new Date());
-        bean.setId(null);
         return dao.save(bean);
     }
     
@@ -39,14 +39,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public User update(User bean) {
         if (!ObjectUtils.isEmpty(bean.getId())){
+            bean.setUpdateDate(new Date());
             return dao.save(bean);
         }
         return null;
     }
     
     @Override
-    public Boolean delete(Long id) {
-        if (ObjectUtils.isEmpty(id)){
+    public Boolean delete(String id) {
+        if (StringUtils.isEmpty(id)){
             return Boolean.FALSE;
         }
         dao.deleteById(id);
@@ -54,7 +55,7 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
-    public User findById(Long id) {
+    public User findById(String id) {
         return dao.findById(id).orElse(null);
     }
     
@@ -66,5 +67,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean checkEmail(String email) {
         return dao.countByEmail(email) == 0;
+    }
+    
+    @Override
+    public User findByEmail(String email) {
+        return dao.findByEmail(email);
     }
 }

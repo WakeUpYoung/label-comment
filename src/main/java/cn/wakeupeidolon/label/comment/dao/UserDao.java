@@ -9,7 +9,10 @@ import org.springframework.stereotype.Repository;
  * @author Wang Yu
  */
 @Repository
-public interface UserDao extends JpaRepository<User, Long> {
+public interface UserDao extends JpaRepository<User, String> {
     @Query
     int countByEmail(String email);
+    
+    @Query
+    User findByEmail(String email);
 }

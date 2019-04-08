@@ -1,5 +1,8 @@
 package cn.wakeupeidolon.label.comment.entity;
 
+import org.hibernate.annotations.GenericGenerator;
+
+import javax.annotation.Generated;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.Objects;
@@ -9,8 +12,12 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "tb_user")
-public class User implements BaseBean{
-    private Long id;
+public class User implements BaseBean<String>{
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(generator = "generateUserId")
+    @GenericGenerator(name = "generateUserId", strategy ="cn.wakeupeidolon.label.comment.config.GenerateUserId")
+    private String id;
     private String username;
     private String password;
     private String email;
@@ -21,13 +28,12 @@ public class User implements BaseBean{
     private Date createDate;
     private Date updateDate;
     
-    @Id
-    @Column(name = "id")
-    public Long getId() {
+    @Override
+    public String getId() {
         return id;
     }
     
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
     
@@ -126,8 +132,8 @@ public class User implements BaseBean{
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return id == user.id &&
-                isAdmin == user.isAdmin &&
+        return id.equals(user.id) &&
+                isAdmin.equals(user.isAdmin) &&
                 Objects.equals(username, user.username) &&
                 Objects.equals(password, user.password) &&
                 Objects.equals(email, user.email) &&

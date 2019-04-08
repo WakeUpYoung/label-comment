@@ -25,6 +25,7 @@ spring:
       connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
       validation-query-timeout: 10
 
+
   jpa:
     show-sql: true
     hibernate:
@@ -37,4 +38,13 @@ config:
       max-pool-size: 200
       queue-capacity: 20
       keep-alive: 60
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    timeout: 30000
+    pool:
+      max-idle: 8
+      min-idle: 0
+      max-wait-millis: 10000
+      max-active: 100
 
