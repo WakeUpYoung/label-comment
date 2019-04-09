@@ -79,7 +79,7 @@ public class UserController {
         // 验证输入的验证码是否正确匹配
         Jedis jedis = redis.redisPoolFactory().getResource();
         String emailCode = jedis.get(vo.getEmail());
-        if (!vo.getValidCode().equalsIgnoreCase(emailCode)){
+        if (!checkEmailCode(jedis, vo.getEmail(), emailCode)){
             return Result.error(ErrorCode.INVALID_CODE);
         }
         jedis.del(vo.getEmail());
@@ -114,7 +114,7 @@ public class UserController {
     public Result<Boolean> validEmail(@RequestBody @Validated EmailValidCodeVO validCodeVO){
         Jedis jedis = redis.redisPoolFactory().getResource();
         String emailCode = jedis.get(validCodeVO.getEmail());
-        if (!validCodeVO.getValidCode().equalsIgnoreCase(emailCode)){
+        if (!checkEmailCode(jedis, validCodeVO.getEmail(), emailCode)){
             return Result.error(ErrorCode.INVALID_CODE);
         }
         // 不删除缓存，交给校验方删除
@@ -167,12 +167,29 @@ public class UserController {
         jedis.expire(key, 60 * 60 * 24);
     }
     
+    /**
+     * 使用邮件发送验证码
+     * @param to 发送到
+     * @param title 邮件标题
+     * @param content 邮件内容
+     * @param code 验证码
+     */
     private void sendEmailWithCode(String to, String title, String content, String code){
         Jedis jedis = redis.redisPoolFactory().getResource();
         jedis.set(to , code);
         // 设置过期时长30分钟
         jedis.expire(to , 30 * 60);
         emailAsync.sendEmail(to , title, content);
+    }
+    
+    /**
+     * 验证邮件
+     */
+    private Boolean checkEmailCode(Jedis jedis, String email, String input){
+        if (!jedis.exists(email)){
+            return false;
+        }
+        return jedis.get(email).equalsIgnoreCase(input);
     }
     
 }
