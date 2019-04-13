@@ -2,6 +2,7 @@ package cn.wakeupeidolon.label.comment.controller;
 
 import cn.wakeupeidolon.label.comment.config.RedisConfig;
 import cn.wakeupeidolon.label.comment.controller.vo.request.*;
+import cn.wakeupeidolon.label.comment.controller.vo.response.QQUserInfoVO;
 import cn.wakeupeidolon.label.comment.controller.vo.response.UserVO;
 import cn.wakeupeidolon.label.comment.domain.Result;
 import cn.wakeupeidolon.label.comment.domain.enums.ErrorCode;
@@ -11,8 +12,11 @@ import cn.wakeupeidolon.label.comment.utils.BeanMapper;
 import cn.wakeupeidolon.label.comment.utils.EmailContent;
 import cn.wakeupeidolon.label.comment.service.async.EmailAsync;
 import cn.wakeupeidolon.label.comment.utils.EncryptUtils;
+import cn.wakeupeidolon.label.comment.utils.HttpUtils;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
@@ -46,6 +50,22 @@ public class UserController {
         this.userService = userService;
         this.emailAsync = emailAsync;
         this.redis = redis;
+    }
+    
+    @PostMapping("loginWithQQ")
+    @ApiOperation("使用QQ登录")
+    public Result<String> loginWithQQ(@RequestBody @Validated QQLoginVO loginVO){
+        String url = "https://graph.qq.com/user/get_user_info?" +
+                "access_token=" + loginVO.getAccessToken() + "&" +
+                "oauth_consumer_key=" + loginVO.getOauthConsumerKey() +"&" +
+                "openid=" + loginVO.getOpenId() + "&" +
+                "format=json";
+        String result = HttpUtils.get(url);
+        System.out.println(result);
+        QQUserInfoVO qqUserInfoVO = JSON.parseObject(result, QQUserInfoVO.class);
+        String x = JSON.toJSONString(qqUserInfoVO);
+        System.out.println(x);
+        return Result.success(x);
     }
     
     @PostMapping("/sendEmail")
