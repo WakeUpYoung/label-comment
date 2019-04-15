@@ -1,17 +1,26 @@
 package cn.wakeupeidolon.label.comment.controller.vo.response;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * @author Wang Yu
  */
+@ApiModel("QQ返回用户数据")
 public class QQUserInfoVO {
+    @ApiModelProperty("返回码")
     private Integer ret;
     private String msg;
+    @ApiModelProperty("用户昵称")
     private String nickname;
     private String figureurl;
     private String figureurl_1;
     private String figureurl_2;
+    @ApiModelProperty("大小为40×40像素的QQ头像URL")
     private String figureurl_qq_1;
+    @ApiModelProperty("大小为100×100像素的QQ头像URL")
     private String figureurl_qq_2;
+    @ApiModelProperty("性别")
     private String gender;
     
     public Integer getRet() {

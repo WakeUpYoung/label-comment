@@ -6,7 +6,10 @@ import cn.wakeupeidolon.label.comment.controller.vo.response.QQUserInfoVO;
 import cn.wakeupeidolon.label.comment.controller.vo.response.UserVO;
 import cn.wakeupeidolon.label.comment.domain.Result;
 import cn.wakeupeidolon.label.comment.domain.enums.ErrorCode;
+import cn.wakeupeidolon.label.comment.dto.UserDTO;
+import cn.wakeupeidolon.label.comment.entity.QQUser;
 import cn.wakeupeidolon.label.comment.entity.User;
+import cn.wakeupeidolon.label.comment.service.QQUserService;
 import cn.wakeupeidolon.label.comment.service.UserService;
 import cn.wakeupeidolon.label.comment.utils.BeanMapper;
 import cn.wakeupeidolon.label.comment.utils.EmailContent;
@@ -19,6 +22,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,31 +45,75 @@ public class UserController {
     
     private final UserService userService;
     
+    private final QQUserService qqService;
+    
     private final EmailAsync emailAsync;
     
     private final RedisConfig redis;
     
     @Autowired
-    public UserController(UserService userService, EmailAsync emailAsync, RedisConfig redis) {
+    public UserController(UserService userService,QQUserService qqService, EmailAsync emailAsync, RedisConfig redis) {
         this.userService = userService;
         this.emailAsync = emailAsync;
         this.redis = redis;
+        this.qqService = qqService;
     }
     
     @PostMapping("loginWithQQ")
     @ApiOperation("使用QQ登录")
-    public Result<String> loginWithQQ(@RequestBody @Validated QQLoginVO loginVO){
+    public Result<UserDTO> loginWithQQ(@RequestBody @Validated QQLoginVO loginVO){
         String url = "https://graph.qq.com/user/get_user_info?" +
                 "access_token=" + loginVO.getAccessToken() + "&" +
                 "oauth_consumer_key=" + loginVO.getOauthConsumerKey() +"&" +
                 "openid=" + loginVO.getOpenId() + "&" +
                 "format=json";
+        // 从QQ API 获取用户信息
         String result = HttpUtils.get(url);
-        System.out.println(result);
         QQUserInfoVO qqUserInfoVO = JSON.parseObject(result, QQUserInfoVO.class);
-        String x = JSON.toJSONString(qqUserInfoVO);
-        System.out.println(x);
-        return Result.success(x);
+        if (qqUserInfoVO == null){
+            return Result.error("QQ登录请求失败");
+        }
+        UserDTO dto;
+        String openId = loginVO.getOpenId();
+        // 如果该用户已注册,则获取用户信息，并缓存到Redis
+        if (qqService.hasUser(openId)){
+            User user;
+            // 查询QQ表
+            QQUser qqUser = qqService.findByOpenId(openId);
+            // 查询缓存
+            UserVO userInfoFromCache = getUserInfoFromCache(qqUser.getUserId());
+            if (userInfoFromCache == null){
+                // 查询用户表
+                user = userService.findById(qqUser.getUserId());
+            }else {
+                user = BeanMapper.map(userInfoFromCache, User.class);
+            }
+            dto = BeanMapper.map(user, UserDTO.class);
+            dto.setFigureurlQqBig(qqUser.getFigureurlQqBig());
+            dto.setFigureurlQqSmall(qqUser.getFigureurlQqSmall());
+            dto.setNickname(qqUser.getNickname());
+            UserVO userVO = BeanMapper.map(user, UserVO.class);
+            // 缓存用户
+            cacheUser(userVO);
+        }else {
+        //    如果用户尚未注册，则向用户表和QQ表新增数据
+            QQUser qqUser = new QQUser();
+            qqUser.setFigureurlQqBig(qqUserInfoVO.getFigureurl_qq_2());
+            qqUser.setFigureurlQqSmall(qqUserInfoVO.getFigureurl_qq_1());
+            qqUser.setOpenId(openId);
+            qqUser.setNickname(qqUserInfoVO.getNickname());
+            User user = new User();
+            int gender = qqUserInfoVO.getGender().equals("男") ? 1 : 0;
+            user.setGender(gender);
+            user.setPassword("default");
+            user.setEmail("not_set_" + RandomStringUtils.randomAlphanumeric(10));
+            dto = qqService.saveQQAndUser(user, qqUser);
+            UserVO userVO = BeanMapper.map(dto, UserVO.class);
+            // 缓存用户
+            cacheUser(userVO);
+        }
+        return Result.success(dto);
+    
     }
     
     @PostMapping("/sendEmail")
@@ -185,6 +233,18 @@ public class UserController {
         jedis.set(key, JSON.toJSONString(userVO));
         // 一天
         jedis.expire(key, 60 * 60 * 24);
+    }
+    
+    /**
+     * 从redis读取缓存
+     */
+    private UserVO getUserInfoFromCache(String userId){
+        Jedis jedis = redis.redisPoolFactory().getResource();
+        if(!jedis.exists(userId)){
+            return null;
+        }
+        String json = jedis.get(userId);
+        return JSONObject.parseObject(json, UserVO.class);
     }
     
     /**

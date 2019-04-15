@@ -28,6 +28,7 @@ public class UserServiceImpl implements UserService {
         bean.setIsAdmin((byte)0);
         bean.setCreateDate(new Date());
         bean.setUpdateDate(new Date());
+        bean.setLastLoginTime(new Date());
         return dao.save(bean);
     }
     
