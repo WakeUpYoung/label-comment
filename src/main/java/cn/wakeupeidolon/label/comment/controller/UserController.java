@@ -31,6 +31,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import redis.clients.jedis.Jedis;
 
+import java.net.ConnectException;
 import java.util.Date;
 
 /**
@@ -81,7 +82,8 @@ public class UserController {
             // 查询QQ表
             QQUser qqUser = qqService.findByOpenId(openId);
             // 查询缓存
-            UserVO userInfoFromCache = getUserInfoFromCache(qqUser.getUserId());
+            UserVO userInfoFromCache = null;
+            userInfoFromCache = getUserInfoFromCache(qqUser.getUserId());
             if (userInfoFromCache == null){
                 // 查询用户表
                 user = userService.findById(qqUser.getUserId());
@@ -227,24 +229,35 @@ public class UserController {
      * @param userVO 用户信息
      */
     private void cacheUser(UserVO userVO){
-        Jedis jedis = redis.redisPoolFactory().getResource();
-        // 保存用户信息到缓存
-        String key = String.valueOf(userVO.getId());
-        jedis.set(key, JSON.toJSONString(userVO));
-        // 一天
-        jedis.expire(key, 60 * 60 * 24);
+        try{
+            Jedis jedis = redis.redisPoolFactory().getResource();
+            // 保存用户信息到缓存
+            String key = String.valueOf(userVO.getId());
+            jedis.set(key, JSON.toJSONString(userVO));
+            // 一天
+            jedis.expire(key, 60 * 60 * 24);
+    
+        }catch (Exception e){
+            LOG.error("连接Redis失败");
+        }
     }
     
     /**
      * 从redis读取缓存
      */
     private UserVO getUserInfoFromCache(String userId){
-        Jedis jedis = redis.redisPoolFactory().getResource();
-        if(!jedis.exists(userId)){
+        try{
+            Jedis jedis = redis.redisPoolFactory().getResource();
+            if(!jedis.exists(userId)){
+                return null;
+            }
+            String json = jedis.get(userId);
+            return JSONObject.parseObject(json, UserVO.class);
+    
+        }catch (Exception e){
+            LOG.error("连接Redis失败");
             return null;
         }
-        String json = jedis.get(userId);
-        return JSONObject.parseObject(json, UserVO.class);
     }
     
     /**
