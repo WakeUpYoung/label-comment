@@ -2,6 +2,7 @@ package cn.wakeupeidolon.label.comment.controller.vo.request;
 
 import io.swagger.annotations.ApiModel;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -13,6 +14,7 @@ import java.io.Serializable;
 public class EmailVO implements Serializable {
     @NotNull
     @NotBlank
+    @Email(message = "邮箱格式不正确")
     private String email;
     
     public String getEmail() {

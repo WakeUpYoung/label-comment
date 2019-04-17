@@ -12,12 +12,12 @@ import java.io.Serializable;
  */
 @ApiModel("邮箱验证码")
 public class EmailValidCodeVO implements Serializable {
-    @NotBlank
-    @NotNull
+    @NotBlank(message = "邮箱不能为空")
+    @NotNull(message = "邮箱不能为空")
     @ApiModelProperty("邮箱")
     private String email;
-    @NotBlank
-    @NotNull
+    @NotBlank(message = "验证码不能为空")
+    @NotNull(message = "验证码不能为空")
     @ApiModelProperty("邮箱验证码")
     private String validCode;
     
