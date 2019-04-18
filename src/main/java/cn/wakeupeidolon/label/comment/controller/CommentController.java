@@ -45,11 +45,11 @@ public class CommentController {
     @ApiOperation("获取随机的评论详情列表")
     @GetMapping("/random/{count}")
     public Result<List<CommentDTO>> getRandomCommentList(@PathVariable("count") Long count){
-        count = count > 50 ? 50 : count;
+        count = count > 20 ? 20 : count;
         long countAll = commentService.countAll();
         long randomLong = RandomUtils.nextLong(0, countAll - count);
         // 查询随机出来的评论列表
-        List<Comment> commentList = commentService.findCommentLimit(randomLong - count, count);
+        List<Comment> commentList = commentService.findCommentLimit(randomLong, count);
         Set<Long> idSet = commentList.stream().map(Comment::getCommodityId).collect(Collectors.toSet());
         Map<Long, Commodity> commodityMap = new HashMap<>();
         for (Long id : idSet) {
