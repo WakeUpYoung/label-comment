@@ -1,0 +1,4 @@
+{
+    "lasted" : "1.0.0",
+    "description" : ["新增了版本控制", "修改了description数据结构"]
+}
