@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author Wang Yu
@@ -18,7 +19,9 @@ public class VersionUtils {
     
     public static Version get(){
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(new File("version.txt")));
+            File file = new File("version.txt");
+            InputStream in = new FileInputStream(file);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
             String line;
             StringBuilder builder = new StringBuilder();
             while ((line = reader.readLine()) != null){

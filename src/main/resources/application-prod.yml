@@ -1,5 +1,11 @@
 server:
-  port: 8095
+  port: 8094
+  tomcat:
+    max-http-post-size: 4096
+  ssl:
+    key-store: classpath:1015011_www.wakeupeidolon.cn.pfx
+    key-store-password: Eu57tXRA
+    key-store-type: PKCS12
 
 spring:
   datasource:
@@ -30,9 +36,10 @@ spring:
       ddl-auto: none
 
 logging:
-  path: /home/label-comment/log/
+  path: /home/comment-label/log/
 
 config:
+  https-port: 8095
   async:
     executor:
       core-pool-size: 10

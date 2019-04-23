@@ -7,7 +7,7 @@ public enum ErrorCode {
     NOT_REGISTER(-502, "该邮箱尚未注册"),
     INVALID_CODE(-503, "输入的验证信息不正确"),
     CANNOT_ACCESS(-401, "禁止访问"),
-    UNKNOWN_ERROR(-1, "未知错误")
+    UNKNOWN_ERROR(-1, "服务器内部错误")
     ;
     
     private Integer code;
