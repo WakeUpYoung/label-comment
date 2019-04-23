@@ -108,7 +108,9 @@ public class UserController {
             int gender = qqUserInfoVO.getGender().equals("男") ? 1 : 0;
             user.setGender(gender);
             user.setPassword("default");
+            user.setLastLoginTime(new Date());
             user.setEmail("not_set_" + RandomStringUtils.randomAlphanumeric(10));
+            user.setUsername(qqUserInfoVO.getNickname());
             dto = qqService.saveQQAndUser(user, qqUser);
             UserVO userVO = BeanMapper.map(dto, UserVO.class);
             // 缓存用户
