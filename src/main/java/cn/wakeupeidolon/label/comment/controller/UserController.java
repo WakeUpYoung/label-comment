@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.ShardedJedis;
 
 import java.net.ConnectException;
 import java.util.Date;
@@ -149,7 +150,7 @@ public class UserController {
     @Transactional
     public Result<UserVO> register(@RequestBody @Validated RegisterVO vo){
         // 验证输入的验证码是否正确匹配
-        Jedis jedis = redis.redisPoolFactory().getResource();
+        ShardedJedis jedis = redis.redisPoolFactory().getResource();
         String emailCode = jedis.get(vo.getEmail());
         if (!checkEmailCode(jedis, vo.getEmail(), emailCode)){
             return Result.error(ErrorCode.INVALID_CODE);
@@ -184,7 +185,7 @@ public class UserController {
     @PostMapping("/validEmail")
     @ApiOperation("校验邮箱")
     public Result<Boolean> validEmail(@RequestBody @Validated EmailValidCodeVO validCodeVO){
-        Jedis jedis = redis.redisPoolFactory().getResource();
+        ShardedJedis jedis = redis.redisPoolFactory().getResource();
         String emailCode = jedis.get(validCodeVO.getEmail());
         if (!checkEmailCode(jedis, validCodeVO.getEmail(), emailCode)){
             return Result.error(ErrorCode.INVALID_CODE);
@@ -200,7 +201,7 @@ public class UserController {
         // 用户忘记密码，应先向邮箱发送一封验证邮件
         // 邮件发送后，验证用户输入的验证码是否匹配
         // 匹配后即可更改密码
-        Jedis jedis = redis.redisPoolFactory().getResource();
+        ShardedJedis jedis = redis.redisPoolFactory().getResource();
         if (!jedis.exists(passwordVO.getEmail())){
             return Result.error(ErrorCode.CANNOT_ACCESS);
         }
@@ -232,7 +233,7 @@ public class UserController {
      */
     private void cacheUser(UserVO userVO){
         try{
-            Jedis jedis = redis.redisPoolFactory().getResource();
+            ShardedJedis jedis = redis.redisPoolFactory().getResource();
             // 保存用户信息到缓存
             String key = String.valueOf(userVO.getId());
             jedis.set(key, JSON.toJSONString(userVO));
@@ -249,7 +250,7 @@ public class UserController {
      */
     private UserVO getUserInfoFromCache(String userId){
         try{
-            Jedis jedis = redis.redisPoolFactory().getResource();
+            ShardedJedis jedis = redis.redisPoolFactory().getResource();
             if(!jedis.exists(userId)){
                 return null;
             }
@@ -270,7 +271,7 @@ public class UserController {
      * @param code 验证码
      */
     private void sendEmailWithCode(String to, String title, String content, String code){
-        Jedis jedis = redis.redisPoolFactory().getResource();
+        ShardedJedis jedis = redis.redisPoolFactory().getResource();
         jedis.set(to , code);
         // 设置过期时长30分钟
         jedis.expire(to , 30 * 60);
@@ -280,7 +281,7 @@ public class UserController {
     /**
      * 验证邮件
      */
-    private Boolean checkEmailCode(Jedis jedis, String email, String input){
+    private Boolean checkEmailCode(ShardedJedis jedis, String email, String input){
         if (!jedis.exists(email)){
             return false;
         }

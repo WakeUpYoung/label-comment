@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.ShardedJedis;
 
 /**
  * @author Wang Yu
@@ -31,7 +32,7 @@ public class VersionController {
     @GetMapping("/lasted")
     @ApiOperation("获取最新版本信息")
     public Result<Version> lasted(){
-        Jedis jedis = redisConfig.redisPoolFactory().getResource();
+        ShardedJedis jedis = redisConfig.redisPoolFactory().getResource();
         String version = jedis.get("version");
         Version lastedVersion = JSON.parseObject(version, Version.class);
         if (lastedVersion != null){
@@ -43,7 +44,7 @@ public class VersionController {
     @GetMapping("/update")
     @ApiOperation("立即更新")
     public Result<Version> update(){
-        Jedis jedis = redisConfig.redisPoolFactory().getResource();
+        ShardedJedis jedis = redisConfig.redisPoolFactory().getResource();
         Version version = VersionUtils.get();
         String json = JSON.toJSONString(version);
         jedis.set("version", json);

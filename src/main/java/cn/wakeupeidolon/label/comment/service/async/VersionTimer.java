@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.ShardedJedis;
 
 /**
  * @author Wang Yu
@@ -35,7 +36,7 @@ public class VersionTimer {
         try{
             Version version = VersionUtils.get();
             if (version != null){
-                Jedis jedis = redisConfig.redisPoolFactory().getResource();
+                ShardedJedis jedis = redisConfig.redisPoolFactory().getResource();
                 Version jedisVersion = new Version();
                 String jedisVersionJson = jedis.get("version");
                 if (jedisVersionJson != null){
