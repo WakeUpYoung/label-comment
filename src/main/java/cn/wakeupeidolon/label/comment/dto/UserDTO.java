@@ -7,6 +7,7 @@ import java.util.Date;
  * @author Wang Yu
  */
 public class UserDTO implements Serializable {
+    private String id;
     private String username;
     private String email;
     private String realName;
@@ -96,5 +97,13 @@ public class UserDTO implements Serializable {
     
     public void setFigureurlQqBig(String figureurlQqBig) {
         this.figureurlQqBig = figureurlQqBig;
+    }
+    
+    public String getId() {
+        return id;
+    }
+    
+    public void setId(String id) {
+        this.id = id;
     }
 }

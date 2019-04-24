@@ -151,6 +151,7 @@ public class UserController {
             User user = userService.findById(vo.getId());
             user.setEmail(vo.getEmail());
             userService.update(user);
+            jedis.del(vo.getEmail());
             return Result.success(Boolean.TRUE);
         }
         return Result.error("验证码不匹配");
