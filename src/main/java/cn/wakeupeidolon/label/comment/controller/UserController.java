@@ -91,14 +91,15 @@ public class UserController {
             }else {
                 user = BeanMapper.map(userInfoFromCache, User.class);
             }
-            user.setLastLoginTime(new Date());
+            Date loginTime = new Date();
+            user.setLastLoginTime(loginTime);
             // 更新最新登录时间
-            User update = userService.update(user);
-            dto = BeanMapper.map(update, UserDTO.class);
+            userService.updateLoginDate(loginTime, user.getId());
+            dto = BeanMapper.map(user, UserDTO.class);
             dto.setFigureurlQqBig(qqUser.getFigureurlQqBig());
             dto.setFigureurlQqSmall(qqUser.getFigureurlQqSmall());
             dto.setNickname(qqUser.getNickname());
-            UserVO userVO = BeanMapper.map(update, UserVO.class);
+            UserVO userVO = BeanMapper.map(user, UserVO.class);
             // 缓存用户
             cacheUser(userVO);
         }else {
@@ -197,12 +198,13 @@ public class UserController {
         // 如果密码匹配
         if (user.getPassword().equals(EncryptUtils.md5(loginVO.getPassword()))){
             // 更新用户最新登录时间
-            user.setLastLoginTime(new Date());
-            User update = userService.update(user);
-            QQUser qqUser = qqService.findByUserId(update.getId());
-            UserVO userVO = BeanMapper.map(update, UserVO.class);
+            Date loginTime = new Date();
+            user.setLastLoginTime(loginTime);
+            userService.updateLoginDate(loginTime, user.getId());
+            QQUser qqUser = qqService.findByUserId(user.getId());
+            UserVO userVO = BeanMapper.map(user, UserVO.class);
             cacheUser(userVO);
-            UserDTO userDTO = BeanMapper.map(update, UserDTO.class);
+            UserDTO userDTO = BeanMapper.map(user, UserDTO.class);
             if (qqUser != null){
                 userDTO.setFigureurlQqBig(qqUser.getFigureurlQqBig());
                 userDTO.setFigureurlQqSmall(qqUser.getFigureurlQqSmall());

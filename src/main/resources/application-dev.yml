@@ -1,5 +1,10 @@
 server:
   port: 8083
+  max-http-header-size: 8196
+  ssl:
+    key-store: classpath:1015011_www.wakeupeidolon.cn.pfx
+    key-store-password: Eu57tXRA
+    key-store-type: PKCS12
 
 spring:
   datasource:
@@ -32,6 +37,7 @@ spring:
       ddl-auto: none
 
 config:
+  https-port: 8085
   async:
     executor:
       core-pool-size: 10
@@ -39,9 +45,10 @@ config:
       queue-capacity: 20
       keep-alive: 60
   redis:
-    host: 127.0.0.1
+    host: 39.108.74.47
     port: 6379
     timeout: 30000
+    password: wangyu123
     pool:
       max-idle: 8
       min-idle: 0

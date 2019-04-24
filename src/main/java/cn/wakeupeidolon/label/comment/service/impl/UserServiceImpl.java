@@ -5,6 +5,7 @@ import cn.wakeupeidolon.label.comment.entity.User;
 import cn.wakeupeidolon.label.comment.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -21,6 +22,12 @@ public class UserServiceImpl implements UserService {
     @Autowired
     public UserServiceImpl(UserDao dao) {
         this.dao = dao;
+    }
+    
+    @Override
+    @Transactional
+    public int updateLoginDate(Date loginTime, String id) {
+        return dao.updateUserLoginDate(loginTime, id);
     }
     
     @Override

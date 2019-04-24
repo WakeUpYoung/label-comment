@@ -2,6 +2,9 @@ package cn.wakeupeidolon.label.comment.controller.vo.request;
 
 import io.swagger.annotations.ApiModel;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 /**
  * @author Wang Yu
  */
@@ -10,6 +13,8 @@ public class QQLoginVO {
     private String expiresIn;
     private String oauthConsumerKey;
     private String accessToken;
+    @NotNull
+    @NotBlank
     private String openId;
     
     public String getExpiresIn() {
