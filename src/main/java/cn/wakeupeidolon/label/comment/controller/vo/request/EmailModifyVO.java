@@ -1,7 +1,6 @@
 package cn.wakeupeidolon.label.comment.controller.vo.request;
 
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -11,16 +10,21 @@ import java.io.Serializable;
 /**
  * @author Wang Yu
  */
-@ApiModel("邮箱")
-public class EmailVO implements Serializable {
+@ApiModel("修改邮箱")
+public class EmailModifyVO implements Serializable {
+    
     @NotNull
     @NotBlank
-    @Email(message = "邮箱格式不正确")
+    @Email
     private String email;
     
     @NotNull
-    @ApiModelProperty("是否是修改请求?")
-    private Boolean modify;
+    @NotBlank
+    private String validCode;
+    
+    @NotBlank
+    @NotNull
+    private String id;
     
     public String getEmail() {
         return email;
@@ -30,11 +34,19 @@ public class EmailVO implements Serializable {
         this.email = email;
     }
     
-    public Boolean getModify() {
-        return modify;
+    public String getValidCode() {
+        return validCode;
     }
     
-    public void setModify(Boolean modify) {
-        this.modify = modify;
+    public void setValidCode(String validCode) {
+        this.validCode = validCode;
+    }
+    
+    public String getId() {
+        return id;
+    }
+    
+    public void setId(String id) {
+        this.id = id;
     }
 }

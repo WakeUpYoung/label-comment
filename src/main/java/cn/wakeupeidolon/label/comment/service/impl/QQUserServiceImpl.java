@@ -84,4 +84,9 @@ public class QQUserServiceImpl implements QQUserService {
         dto.setFigureurlQqBig(qqSave.getFigureurlQqBig());
         return dto;
     }
+    
+    @Override
+    public QQUser findByUserId(String userId) {
+        return dao.findByUserId(userId);
+    }
 }

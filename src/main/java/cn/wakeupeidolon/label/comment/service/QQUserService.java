@@ -13,4 +13,6 @@ public interface QQUserService extends BaseService<QQUser, Long>{
     QQUser findByOpenId(String openId);
     
     UserDTO saveQQAndUser(User user, QQUser qq);
+    
+    QQUser findByUserId(String userId);
 }

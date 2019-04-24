@@ -13,7 +13,7 @@ public class EmailContent {
      * @return html
      */
     public static String validation(String code){
-        return "\t<p>感谢您注册Labeling Comment</p>\n" +
+        return "\t<p>感谢您使用Comment Label</p>\n" +
                 "\t<p>您的验证码为:</p>\n" +
                 "\t<p style=\"font-size: 30px;color: #3A5FCD;\">" + code + "</p>\n" +
                 "\t<p>30分钟内有效</p>" +

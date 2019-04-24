@@ -14,4 +14,6 @@ public interface QQUserDao extends JpaRepository<QQUser, Long> {
     int countByOpenId(String openId);
     @Query
     QQUser findByOpenId(String openId);
+    @Query
+    QQUser findByUserId(String userId);
 }

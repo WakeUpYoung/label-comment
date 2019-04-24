@@ -31,3 +31,5 @@ HELP.md
 
 mvnw
 mvnw.cmd
+
+*.pfx

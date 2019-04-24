@@ -91,11 +91,14 @@ public class UserController {
             }else {
                 user = BeanMapper.map(userInfoFromCache, User.class);
             }
-            dto = BeanMapper.map(user, UserDTO.class);
+            user.setLastLoginTime(new Date());
+            // 更新最新登录时间
+            User update = userService.update(user);
+            dto = BeanMapper.map(update, UserDTO.class);
             dto.setFigureurlQqBig(qqUser.getFigureurlQqBig());
             dto.setFigureurlQqSmall(qqUser.getFigureurlQqSmall());
             dto.setNickname(qqUser.getNickname());
-            UserVO userVO = BeanMapper.map(user, UserVO.class);
+            UserVO userVO = BeanMapper.map(update, UserVO.class);
             // 缓存用户
             cacheUser(userVO);
         }else {
@@ -122,16 +125,35 @@ public class UserController {
     }
     
     @PostMapping("/sendEmail")
-    @ApiOperation("发送注册验证邮件")
+    @ApiOperation("发送验证邮件")
     public Result<Boolean> sendEmail(@RequestBody @Validated EmailVO vo){
-        // 1. 验证邮箱是否存在
-        if (!userService.checkEmail(vo.getEmail())){
-            return Result.error(ErrorCode.USER_REPEAT);
+        if (!vo.getModify()){
+            // 1. 验证邮箱是否存在
+            if (!userService.checkEmail(vo.getEmail())){
+                return Result.error(ErrorCode.USER_REPEAT);
+            }
         }
         // 2. 若该用户尚未注册则发送验证邮件
         String code = RandomStringUtils.randomAlphanumeric(6).toUpperCase();
         sendEmailWithCode(vo.getEmail(), "[Wake Up Eidolon]邮箱验证", EmailContent.validation(code), code);
         return Result.success(Boolean.TRUE);
+    }
+    
+    @PostMapping("/modifyEmail")
+    @ApiOperation("修改邮箱")
+    public Result<Boolean> modifyEmail(@RequestBody @Validated EmailModifyVO vo){
+        ShardedJedis jedis = redis.redisPoolFactory().getResource();
+        if (!jedis.exists(vo.getEmail())){
+            return Result.error("验证码已过期或尚未发送");
+        }
+        // 如果验证码匹配
+        if (jedis.get(vo.getEmail()).equalsIgnoreCase(vo.getValidCode())){
+            User user = userService.findById(vo.getId());
+            user.setEmail(vo.getEmail());
+            userService.update(user);
+            return Result.success(Boolean.TRUE);
+        }
+        return Result.error("验证码不匹配");
     }
     
     @PostMapping("/passwordEmail")
@@ -145,9 +167,9 @@ public class UserController {
         sendEmailWithCode(vo.getEmail(), "[Wake Up Eidolon]尝试修改密码", EmailContent.forgetPassword(code), code);
         return Result.success(Boolean.TRUE);
     }
+    
     @PostMapping("/register")
     @ApiOperation("注册")
-    @Transactional
     public Result<UserVO> register(@RequestBody @Validated RegisterVO vo){
         // 验证输入的验证码是否正确匹配
         ShardedJedis jedis = redis.redisPoolFactory().getResource();
@@ -169,17 +191,25 @@ public class UserController {
     @PostMapping("/login")
     @ApiOperation("登录")
     @Transactional
-    public Result<UserVO> login(@RequestBody @Validated LoginVO loginVO){
+    public Result<UserDTO> login(@RequestBody @Validated LoginVO loginVO){
         User user = userService.findByEmail(loginVO.getUsername());
         // 如果密码匹配
         if (user.getPassword().equals(EncryptUtils.md5(loginVO.getPassword()))){
             // 更新用户最新登录时间
             user.setLastLoginTime(new Date());
             User update = userService.update(user);
+            QQUser qqUser = qqService.findByUserId(update.getId());
             UserVO userVO = BeanMapper.map(update, UserVO.class);
             cacheUser(userVO);
+            UserDTO userDTO = BeanMapper.map(update, UserDTO.class);
+            if (qqUser != null){
+                userDTO.setFigureurlQqBig(qqUser.getFigureurlQqBig());
+                userDTO.setFigureurlQqSmall(qqUser.getFigureurlQqSmall());
+                userDTO.setNickname(qqUser.getNickname());
+            }
+            return Result.success(userDTO);
         }
-        return Result.error("未知原因,登录失败");
+        return Result.error("密码或用户名错误");
     }
     
     @PostMapping("/validEmail")
