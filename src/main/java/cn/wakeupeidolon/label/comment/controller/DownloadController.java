@@ -20,7 +20,7 @@ import java.net.URLEncoder;
 @RequestMapping("/download")
 @Api(tags = {"下载"})
 public class DownloadController {
-    
+
     @GetMapping("/{platform}")
     public void downloadAndroid(HttpServletRequest request, HttpServletResponse response, @PathVariable("platform") String platform){
         String fileName;
@@ -46,7 +46,7 @@ public class DownloadController {
             e.printStackTrace();
         }
         // 实现文件下载
-        byte[] buffer = new byte[1024];
+        byte[] buffer = new byte[1024*1024];
         FileInputStream fis = null;
         BufferedInputStream bis = null;
         try {
