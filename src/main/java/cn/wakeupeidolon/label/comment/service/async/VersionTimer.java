@@ -33,25 +33,25 @@ public class VersionTimer {
     
     @Scheduled(cron = "59 59 23 ? * *")
     public void updateVersion(){
-        try{
+        try (ShardedJedis jedis = redisConfig.redisPoolFactory().getResource()) {
             Version version = VersionUtils.get();
-            if (version != null){
-                ShardedJedis jedis = redisConfig.redisPoolFactory().getResource();
+            if (version != null) {
                 Version jedisVersion = new Version();
                 String jedisVersionJson = jedis.get("version");
-                if (jedisVersionJson != null){
+                if (jedisVersionJson != null) {
                     jedisVersion = JSONObject.parseObject(jedisVersionJson, Version.class);
                 }
                 // 如果在内存中的version不等于最新的version
-                if (!version.getLasted().equals(jedisVersion.getLasted())){
+                if (!version.getLasted().equals(jedisVersion.getLasted())) {
                     //    更新内存中的version
                     jedis.set("version", JSONObject.toJSONString(version));
                     LOG.info("检测到已更新版本, 同步版本成功");
+                
                 }
-            }else {
+            } else {
                 LOG.warn("version文件为空!");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             LOG.error(e.getMessage());
         }
     }

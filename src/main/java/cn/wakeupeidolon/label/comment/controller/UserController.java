@@ -145,6 +145,7 @@ public class UserController {
     public Result<Boolean> modifyEmail(@RequestBody @Validated EmailModifyVO vo){
         ShardedJedis jedis = redis.redisPoolFactory().getResource();
         if (!jedis.exists(vo.getEmail())){
+            jedis.close();
             return Result.error("验证码已过期或尚未发送");
         }
         // 如果验证码匹配
@@ -153,8 +154,10 @@ public class UserController {
             user.setEmail(vo.getEmail());
             userService.update(user);
             jedis.del(vo.getEmail());
+            jedis.close();
             return Result.success(Boolean.TRUE);
         }
+        jedis.close();
         return Result.error("验证码不匹配");
     }
     
@@ -177,6 +180,7 @@ public class UserController {
         ShardedJedis jedis = redis.redisPoolFactory().getResource();
         String emailCode = jedis.get(vo.getEmail());
         if (!checkEmailCode(jedis, vo.getEmail(), emailCode)){
+            jedis.close();
             return Result.error(ErrorCode.INVALID_CODE);
         }
         jedis.del(vo.getEmail());
@@ -187,6 +191,7 @@ public class UserController {
         User save = userService.save(user);
         UserVO userVO = BeanMapper.map(save, UserVO.class);
         cacheUser(userVO);
+        jedis.close();
         return Result.success(userVO);
     }
     
@@ -223,6 +228,7 @@ public class UserController {
         if (!checkEmailCode(jedis, validCodeVO.getEmail(), emailCode)){
             return Result.error(ErrorCode.INVALID_CODE);
         }
+        jedis.close();
         // 不删除缓存，交给校验方删除
         return Result.success(Boolean.TRUE);
     }
@@ -236,6 +242,7 @@ public class UserController {
         // 匹配后即可更改密码
         ShardedJedis jedis = redis.redisPoolFactory().getResource();
         if (!jedis.exists(passwordVO.getEmail())){
+            jedis.close();
             return Result.error(ErrorCode.CANNOT_ACCESS);
         }
         User user;
@@ -257,6 +264,7 @@ public class UserController {
         jedis.del(passwordVO.getEmail());
         // 通过邮件通知用户更改了密码
         emailAsync.sendEmail(passwordVO.getEmail(), "[Wake Up Eidolon]密码已修改", EmailContent.modifyPassword());
+        jedis.close();
         return Result.success(userVO);
     }
     
@@ -265,8 +273,8 @@ public class UserController {
      * @param userVO 用户信息
      */
     private void cacheUser(UserVO userVO){
-        try{
-            ShardedJedis jedis = redis.redisPoolFactory().getResource();
+        try (ShardedJedis jedis = redis.redisPoolFactory().getResource()){
+            
             // 保存用户信息到缓存
             String key = String.valueOf(userVO.getId());
             jedis.set(key, JSON.toJSONString(userVO));
@@ -282,8 +290,7 @@ public class UserController {
      * 从redis读取缓存
      */
     private UserVO getUserInfoFromCache(String userId){
-        try{
-            ShardedJedis jedis = redis.redisPoolFactory().getResource();
+        try (ShardedJedis jedis = redis.redisPoolFactory().getResource()){
             if(!jedis.exists(userId)){
                 return null;
             }
@@ -309,6 +316,7 @@ public class UserController {
         // 设置过期时长30分钟
         jedis.expire(to , 30 * 60);
         emailAsync.sendEmail(to , title, content);
+        jedis.close();
     }
     
     /**
@@ -316,9 +324,12 @@ public class UserController {
      */
     private Boolean checkEmailCode(ShardedJedis jedis, String email, String input){
         if (!jedis.exists(email)){
+            jedis.close();
             return false;
         }
-        return jedis.get(email).equalsIgnoreCase(input);
+        boolean flag = jedis.get(email).equalsIgnoreCase(input);
+        jedis.close();
+        return flag;
     }
     
 }
