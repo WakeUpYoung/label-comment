@@ -22,7 +22,7 @@ public class SwaggerConfig {
     private static final String SWAGGER2_API_BASEPACKAGE = "cn.wakeupeidolon.label.comment.controller";
     private static final String SWAGGER2_API_TITLE = "label for Comment API";
     private static final String SWAGGER2_API_DESCRIPTION = "label for Comment API";
-    private static final String SWAGGER2_API_VERSION = "1.0";
+    private static final String SWAGGER2_API_VERSION = "1.0.1";
     /**
      * createRestApi
      */
