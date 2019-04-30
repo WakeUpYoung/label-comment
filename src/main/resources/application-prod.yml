@@ -3,7 +3,7 @@ server:
   max-http-header-size: 8196
   ssl:
     key-store: classpath:1015011_www.wakeupeidolon.cn.pfx
-    key-store-password: 4QWF2mMk
+    key-store-password: Eu57tXRA
     key-store-type: PKCS12
 
 spring:

@@ -32,11 +32,14 @@ public class VersionController {
     @GetMapping("/lasted")
     @ApiOperation("获取最新版本信息")
     public Result<Version> lasted(){
-        ShardedJedis jedis = redisConfig.redisPoolFactory().getResource();
-        String version = jedis.get("version");
-        Version lastedVersion = JSON.parseObject(version, Version.class);
-        if (lastedVersion != null){
-            return Result.success(lastedVersion);
+        try(ShardedJedis jedis = redisConfig.redisPoolFactory().getResource()){
+            String version = jedis.get("version");
+            Version lastedVersion = JSON.parseObject(version, Version.class);
+            if (lastedVersion != null){
+                return Result.success(lastedVersion);
+            }
+        }catch (RuntimeException e){
+            return Result.error();
         }
         return Result.error();
     }
@@ -44,11 +47,14 @@ public class VersionController {
     @GetMapping("/update")
     @ApiOperation("立即更新")
     public Result<Version> update(){
-        ShardedJedis jedis = redisConfig.redisPoolFactory().getResource();
-        Version version = VersionUtils.get();
-        String json = JSON.toJSONString(version);
-        jedis.set("version", json);
-        return Result.success(version);
+        try(ShardedJedis jedis = redisConfig.redisPoolFactory().getResource()){
+            Version version = VersionUtils.get();
+            String json = JSON.toJSONString(version);
+            jedis.set("version", json);
+            return Result.success(version);
+        }catch (RuntimeException e){
+            return Result.error();
+        }
     }
 
 }
